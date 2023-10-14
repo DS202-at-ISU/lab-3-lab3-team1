@@ -35,6 +35,33 @@ Similarly, deal with the returns of characters.
 
 Based on these datasets calculate the average number of deaths an Avenger suffers. 
 
+```{r}
+# Import tidyverse and other stuff
+library(tidyverse)
+library(readr)
+
+# Convert the Death[1-5] columns to long format
+deaths <- av %>%
+  gather(key = "Time", value = "Death", starts_with("Death")) %>%
+  mutate(Time = parse_number(Time))
+
+# Convert the Return[1-5] columns to long format (if they exist in the dataset)
+returns <- av %>%
+  gather(key = "Time", value = "Return", starts_with("Return")) %>%
+  mutate(Time = parse_number(Time))
+
+# Calculate the average number of deaths an Avenger suffers
+avg_deaths <- deaths %>%
+  group_by(Name.Alias) %>%
+  summarize(total_deaths = sum(Death == "YES")) %>%
+  summarize(avg_deaths = mean(total_deaths))
+
+# Print, "Average deaths of an Avenger: {value of avg_deaths}" as a string
+print(paste("Average deaths of an Avenger: ", avg_deaths))
+```
+
+<!-- Average number of deaths of an avenger: ~0.54% -->
+
 ## Individually
 
 For each team member, copy this part of the report. 
