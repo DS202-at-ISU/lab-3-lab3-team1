@@ -76,6 +76,49 @@ Similarly, deal with the returns of characters.
 Based on these datasets calculate the average number of deaths an
 Avenger suffers.
 
+``` r
+# Import tidyverse and other stuff
+library(tidyverse)
+```
+
+    ## ── Attaching core tidyverse packages ──────────────────────── tidyverse 2.0.0 ──
+    ## ✔ dplyr     1.1.2     ✔ readr     2.1.4
+    ## ✔ forcats   1.0.0     ✔ stringr   1.5.0
+    ## ✔ ggplot2   3.4.3     ✔ tibble    3.2.1
+    ## ✔ lubridate 1.9.2     ✔ tidyr     1.3.0
+    ## ✔ purrr     1.0.2     
+    ## ── Conflicts ────────────────────────────────────────── tidyverse_conflicts() ──
+    ## ✖ dplyr::filter() masks stats::filter()
+    ## ✖ dplyr::lag()    masks stats::lag()
+    ## ℹ Use the conflicted package (<http://conflicted.r-lib.org/>) to force all conflicts to become errors
+
+``` r
+library(readr)
+
+# Convert the Death[1-5] columns to long format
+deaths <- av %>%
+  gather(key = "Time", value = "Death", starts_with("Death")) %>%
+  mutate(Time = parse_number(Time))
+
+# Convert the Return[1-5] columns to long format (if they exist in the dataset)
+returns <- av %>%
+  gather(key = "Time", value = "Return", starts_with("Return")) %>%
+  mutate(Time = parse_number(Time))
+
+# Calculate the average number of deaths an Avenger suffers
+avg_deaths <- deaths %>%
+  group_by(Name.Alias) %>%
+  summarize(total_deaths = sum(Death == "YES")) %>%
+  summarize(avg_deaths = mean(total_deaths))
+
+# Print, "Average deaths of an Avenger: {value of avg_deaths}" as a string
+print(paste("Average deaths of an Avenger: ", avg_deaths))
+```
+
+    ## [1] "Average deaths of an Avenger:  0.54601226993865"
+
+<!-- Average number of deaths of an avenger: ~0.54% -->
+
 ## Individually
 
 For each team member, copy this part of the report.
@@ -85,19 +128,53 @@ Each team member picks one of the statements in the FiveThirtyEight
 and fact checks it based on the data. Use dplyr functionality whenever
 possible.
 
-### FiveThirtyEight Statement
 
-> Quote the statement you are planning to fact-check.
+    ### FiveThirtyEight Statement
 
-### Include the code
+    > Quote the statement you are planning to fact-check.
 
-Make sure to include the code to derive the (numeric) fact for the
-statement
+    > Logan Jorgensen: The article states that "The MVP of the Earth-616 Marvel Universe Avengers has to be Jocasta — an android based on Janet van Dyne and built by Ultron — who has been destroyed five times and then recovered five times.
+
+    > David Szczepanik: The article states that "(I) counted 89 total deaths - some unlucky Avengers are basically Meat Loaf with an E-ZPass - and on 57 occasions the individual made a comeback."
+
+    ### Include the code
+
+    Make sure to include the code to derive the (numeric) fact for the statement
+
+
+    ```r
+    # Logan Jorgensen's code
+    returns %>%
+      group_by(Name.Alias) %>%
+      summarize(total_returns = sum(Return == "YES")) %>%
+      arrange(desc(total_returns)) %>%
+      head(1)
+
+    ## # A tibble: 1 × 2
+    ##   Name.Alias total_returns
+    ##   <chr>              <int>
+    ## 1 Jocasta                5
+
+``` r
+# David Szczepanik's code
+  death_columns <- c("Death")
+  no_count <- sum(deaths[, death_columns] == "YES")
+  cat("Number of deaths: ", no_count, "\n")
+```
+
+    ## Number of deaths:  89
 
 ### Include your answer
 
 Include at least one sentence discussing the result of your
 fact-checking endeavor.
+
+Logan Jorgensen: The result of the code shows that the only Avenger to
+be destroyed and recovered five times is Jocasta. Therefore, the
+statement is true.
+
+David Szczepanik: The code above shows that there were indeed 89 deaths
+within the universe. The statement is true.
 
 Upload your changes to the repository. Discuss and refine answers as a
 team.
